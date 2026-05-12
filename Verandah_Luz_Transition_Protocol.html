@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luz Transition Protocol | Verandah Properties</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal: #008C82;
+    --teal-dark: #005f5a;
+    --teal-light: #e6f4f3;
+    --gold: #D4AF50;
+    --gold-light: #faf5e8;
+    --ink: #1c1c1c;
+    --ink-mid: #3d3d3d;
+    --ink-light: #6b6b6b;
+    --cream: #faf9f7;
+    --white: #ffffff;
+    --border: rgba(0,140,130,0.15);
+    --red: #c0392b;
+    --red-light: #fdf0ef;
+    --green: #27ae60;
+    --green-light: #eafaf1;
+    --amber: #d68910;
+    --amber-light: #fef9e7;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--ink);
+    padding: 10px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .topbar-doc {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Hero */
+  .hero {
+    background: var(--teal);
+    padding: 56px 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .hero-inner { position: relative; z-index: 2; max-width: 900px; }
+  .hero-eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    max-width: 600px;
+    line-height: 1.75;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .hero-meta-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+  .hero-meta-value {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--white);
+  }
+
+  /* Main layout */
+  .main { max-width: 960px; margin: 0 auto; padding: 48px 40px 80px; }
+
+  /* Progress tracker */
+  .progress-tracker {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+  }
+  .progress-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 20px;
+  }
+  .progress-phases {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .progress-phase {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .phase-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .phase-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 2px;
+    background: var(--teal);
+  }
+  .phase-bar-fill.done { width: 100%; background: var(--green); }
+  .phase-bar-fill.active { width: 60%; background: var(--teal); }
+  .phase-bar-fill.pending { width: 0%; }
+  .phase-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-mid);
+  }
+  .phase-date {
+    font-size: 10px;
+    font-weight: 300;
+    color: var(--ink-light);
+  }
+
+  /* Section */
+  .section { margin-bottom: 56px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    width: 40px;
+    height: 40px;
+    background: var(--teal);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .section-title-wrap {}
+  .section-eyebrow {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 3px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .section-title em { font-style: italic; color: var(--teal); }
+
+  /* Step cards */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 16px;
+    align-items: flex-start;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .step-card:hover { border-color: rgba(0,140,130,0.35); box-shadow: 0 2px 12px rgba(0,140,130,0.08); }
+  .step-card.completed { background: var(--green-light); border-color: rgba(39,174,96,0.25); }
+  .step-card.completed .step-title { text-decoration: line-through; color: var(--ink-light); }
+
+  .step-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .step-card.completed .step-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .step-checkbox-check {
+    display: none;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .step-card.completed .step-checkbox-check { display: block; }
+
+  .step-content {}
+  .step-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .step-body {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ink-mid);
+    line-height: 1.75;
+  }
+  .step-body strong { font-weight: 500; color: var(--ink); }
+  .step-body a { color: var(--teal); text-decoration: none; }
+  .step-body a:hover { text-decoration: underline; }
+
+  .step-badge {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-done { background: var(--green-light); color: var(--green); }
+  .badge-now { background: var(--teal-light); color: var(--teal-dark); }
+  .badge-soon { background: var(--amber-light); color: var(--amber); }
+  .badge-midmonth { background: var(--gold-light); color: #8a6d00; }
+  .badge-ongoing { background: #f0f0f0; color: var(--ink-light); }
+
+  /* Info boxes */
+  .info-box {
+    border-radius: 3px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+  .info-box.tip { background: var(--teal-light); border-left: 3px solid var(--teal); }
+  .info-box.warning { background: var(--amber-light); border-left: 3px solid var(--amber); }
+  .info-box.important { background: var(--red-light); border-left: 3px solid var(--red); }
+  .info-box-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .info-box.tip .info-box-label { color: var(--teal-dark); }
+  .info-box.warning .info-box-label { color: var(--amber); }
+  .info-box.important .info-box-label { color: var(--red); }
+
+  /* Signature block */
+  .sig-block {
+    background: var(--ink);
+    border-radius: 3px;
+    padding: 24px 28px;
+    margin: 16px 0;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 2;
+    color: rgba(255,255,255,0.85);
+  }
+  .sig-block .sig-name { color: var(--gold); font-weight: 600; font-size: 14px; }
+  .sig-block .sig-title { color: var(--teal); }
+  .sig-block .sig-bilingual { color: rgba(255,255,255,0.5); font-style: italic; font-size: 12px; }
+  .sig-block .sig-escalation { color: rgba(255,255,255,0.4); font-size: 12px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 12px; padding-top: 12px; }
+
+  /* Video platform cards */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .platform-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px;
+    text-align: center;
+  }
+  .platform-icon { font-size: 28px; margin-bottom: 8px; }
+  .platform-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .platform-desc { font-size: 11px; font-weight: 300; color: var(--ink-light); line-height: 1.6; }
+  .platform-rec {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+  .rec-best { background: var(--teal-light); color: var(--teal-dark); }
+  .rec-good { background: var(--gold-light); color: #8a6d00; }
+  .rec-alt { background: #f0f0f0; color: var(--ink-light); }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* Owner visit policy */
+  .policy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .policy-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 20px 24px;
+    border-top: 3px solid;
+  }
+  .policy-card.occupied { border-top-color: var(--amber); }
+  .policy-card.vacant { border-top-color: var(--teal); }
+  .policy-card-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .policy-card.occupied .policy-card-label { color: var(--amber); }
+  .policy-card.vacant .policy-card-label { color: var(--teal); }
+  .policy-card-time {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .policy-card-desc {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-mid);
+    line-height: 1.7;
+  }
+
+  /* Escalation chain */
+  .escalation-chain {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .escalation-node {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px 20px;
+    text-align: center;
+    flex: 1;
+    min-width: 140px;
+  }
+  .escalation-node.primary { border-top: 3px solid var(--teal); }
+  .escalation-node.secondary { border-top: 3px solid var(--gold); }
+  .escalation-node.tertiary { border-top: 3px solid var(--ink); }
+  .escalation-arrow {
+    font-size: 18px;
+    color: var(--ink-light);
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+  .escalation-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .escalation-role { font-size: 11px; font-weight: 300; color: var(--ink-light); }
+  .escalation-trigger { font-size: 10px; font-weight: 500; color: var(--teal); margin-top: 6px; letter-spacing: 0.04em; }
+
+  /* Footer */
+  .footer {
+    background: var(--ink);
+    padding: 28px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .footer-note {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.4);
+    text-align: right;
+  }
+
+  /* Print */
+  @media print {
+    .topbar { position: static; }
+    body { background: white; }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 40px 24px; }
+    .hero-title { font-size: 32px; }
+    .main { padding: 32px 24px 60px; }
+    .progress-phases { grid-template-columns: 1fr 1fr; }
+    .platform-grid { grid-template-columns: 1fr; }
+    .policy-grid { grid-template-columns: 1fr; }
+    .escalation-chain { flex-direction: column; }
+    .escalation-arrow { transform: rotate(90deg); }
+    .footer { flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-brand">Verandah Properties LLC</div>
+  <div class="topbar-doc">Client Experience Transition Protocol · Confidential</div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Internal Team Document</div>
+    <h1 class="hero-title">Luz Reyes <em>Transition</em><br>Protocol & Rollout Playbook</h1>
+    <p class="hero-sub">A complete step-by-step guide for transitioning the Client Experience Manager role to Luz Reyes — covering communications, systems, video production, email setup, signatures, owner visit policy, and escalation protocols.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Document Owner</div>
+        <div class="hero-meta-value">Pamela Syvertson</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Effective Date</div>
+        <div class="hero-meta-value">May 2026</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Team Lead</div>
+        <div class="hero-meta-value">Megan Fairchild</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">New CEM</div>
+        <div class="hero-meta-value">Luz Reyes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Progress Tracker -->
+  <div class="progress-tracker">
+    <div class="progress-label">Rollout Phase Tracker</div>
+    <div class="progress-phases">
+      <div class="progress-phase">
+        <div class="phase-bar"><div class="phase-bar-fill done"></div></div>
+        <div class="phase-name">Phase 1 — Survey</div>
+        <div class="phase-date">✅ Completed · May 10</div>
+      </div>
+      <div class="progress-phase">
+        <div class="phase-bar"><div class="phase-bar-fill active"></div></div>
+        <div class="phase-name">Phase 2 — Introduction</div>
+        <div class="phase-date">🔵 In Progress · This Week</div>
+      </div>
+      <div class="progress-phase">
+        <div class="phase-bar"><div class="phase-bar-fill pending"></div></div>
+        <div class="phase-name">Phase 3 — Video</div>
+        <div class="phase-date">⏳ Pending · Mid-Month</div>
+      </div>
+      <div class="progress-phase">
+        <div class="phase-bar"><div class="phase-bar-fill pending"></div></div>
+        <div class="phase-name">Phase 4 — Ongoing</div>
+        <div class="phase-date">⏳ Pending · Ongoing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title-wrap">
+        <div class="section-eyebrow">Phase 1 — Already Complete</div>
+        <div class="section-title">Owner Satisfaction <em>Survey</em></div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-card completed" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Jotform survey created and sent to all owners</div>
+          <div class="step-body">Survey live at <a href="https://form.jotform.com/261294193443055" target="_blank">form.jotform.com/261294193443055</a> — sent from Pamela personally to entire owner portfolio. Three required fields: Full Name, Email Address, Property Address.</div>
+        </div>
+        <div class="step-badge badge-done">Done ✓</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Set up Jotform email notifications</div>
+          <div class="step-body">Go to Jotform → your form → <strong>Settings → Emails → Add New Email</strong>. Set recipient to <strong>pamela@verandahproperties.com</strong> so every submission arrives in your inbox instantly. Add <strong>megan@verandahproperties.com</strong> as a second notification recipient.</div>
+        </div>
+        <div class="step-badge badge-now">Do Now</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Monitor and triage survey responses</div>
+          <div class="step-body"><strong>Pamela reviews every response personally.</strong> Flag any owner who scores 1-3 on satisfaction immediately. Luz calls flagged owners within 24 hours. Megan personally calls any owner Luz flags as high-risk. Non-responses after 5 days are also flagged for Luz to call proactively.</div>
+        </div>
+        <div class="step-badge badge-now">Ongoing</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title-wrap">
+        <div class="section-eyebrow">Phase 2 — This Week</div>
+        <div class="section-title">Luz <em>Introduction</em> & Systems Setup</div>
+      </div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Transfer clientexperience@verandahproperties.com to Luz</div>
+          <div class="step-body">Luz takes over full management of <strong>clientexperience@verandahproperties.com</strong>. All owner-facing correspondence goes through this address. Rain forwards any incoming emails to Luz during the transition period. Luz should have full access and be monitoring this inbox daily during business hours.</div>
+        </div>
+        <div class="step-badge badge-now">Do Now</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Set up Luz's email signature</div>
+          <div class="step-body">Copy and set up the following signature exactly in Luz's Gmail settings (<strong>Settings → See All Settings → Signature</strong>):
+
+          <br><br>
+          <strong>Go to Gmail → Settings → General → Signature → Create New</strong></div>
+        </div>
+        <div class="step-badge badge-now">Do Now</div>
+      </div>
+    </div>
+
+    <!-- Signature block -->
+    <div class="sig-block">
+      <div class="sig-name">Luz Reyes</div>
+      <div class="sig-title">Client Experience Specialist · Se Habla Español / English</div>
+      <div>Committed to keeping you informed, every step of the way.</div>
+      <div>Comprometida a mantenerle informado en cada paso del camino.</div>
+      <br>
+      <div><strong style="color:rgba(255,255,255,0.7)">Verandah Properties LLC</strong></div>
+      <div>clientexperience@verandahproperties.com</div>
+      <div>[Direct Phone Number]</div>
+      <div>VerandahProperties.com</div>
+      <div class="sig-escalation">
+        Part of the Client Experience Team led by Megan Fairchild<br>
+        Director of Maintenance & Client Experience<br>
+        Escalations: megan@verandahproperties.com
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <div class="info-box-label">💡 Tip — Bilingual Line</div>
+      The bilingual tagline in Luz's signature serves double duty — it communicates capability to Spanish-speaking owners AND signals Verandah's inclusive, sophisticated service approach to all owners. Keep both lines in the signature at all times.
+    </div>
+
+    <div class="steps" style="margin-top: 20px;">
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Send Luz's personal introduction email to all owners</div>
+          <div class="step-body">Send from <strong>clientexperience@verandahproperties.com</strong> — Subject: <em>"A Personal Hello from Your Verandah Client Experience Team"</em>. This email introduces Luz warmly, mentions bilingual capability, and references Megan's oversight. Do NOT mention Rain or frame this as a change. Frame it as a team introduction only.</div>
+        </div>
+        <div class="step-badge badge-now">This Week</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Send Megan's endorsement email the same day or next day</div>
+          <div class="step-body">Send from <strong>megan@verandahproperties.com</strong> — Subject: <em>"A Word from Megan — Introducing Luz"</em>. Short, warm, personal endorsement of Luz. End with: <em>"More exciting updates from Verandah are coming your way later this month — stay tuned."</em> This creates anticipation for the video rollout.</div>
+        </div>
+        <div class="step-badge badge-now">This Week</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Add Luz to AppFolio as the owner communication contact</div>
+          <div class="step-body">Update AppFolio owner-facing contact information to reflect Luz as the primary Client Experience contact. Ensure all automated owner communications route through or copy clientexperience@verandahproperties.com. Confirm with your AppFolio admin that owner portal messages go to Luz's inbox.</div>
+        </div>
+        <div class="step-badge badge-now">This Week</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Pamela sends handwritten notes to high-risk owners</div>
+          <div class="step-body">Identify your top 15-20 high-risk owners — those with any friction history, DISC S/C profiles, long tenure, or who did not respond to the survey. Send a short personal handwritten note from Pamela on branded notecard. Text: <em>"Dear [First Name] — I'm back at the helm and your investment matters to me personally. Please call me anytime. — Pamela, (407) 855-0331"</em></div>
+        </div>
+        <div class="step-badge badge-now">This Week</div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title-wrap">
+        <div class="section-eyebrow">Phase 3 — Mid Month</div>
+        <div class="section-title">Split Screen <em>Video</em> Production & Deployment</div>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <div class="info-box-label">🎬 What This Video Achieves</div>
+      This is the centerpiece of the rollout. Owners have already received Luz's intro email and Megan's endorsement — now they put a face to both names. A 90-second split screen video showing Megan and Luz together establishes hierarchy, warmth, and professionalism in a way no email can match.
+    </div>
+
+    <!-- Platform cards -->
+    <div style="margin: 24px 0 8px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-light);">Recommended Recording & Editing Platforms</div>
+    <div class="platform-grid">
+      <div class="platform-card">
+        <div class="platform-icon">🎨</div>
+        <div class="platform-name">Canva Video</div>
+        <div class="platform-desc">Easiest option. Built-in split screen templates. Uses your existing Verandah brand kit. No editing experience needed. Free tier works fine.</div>
+        <div class="platform-rec rec-best">⭐ Best for You</div>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">✂️</div>
+        <div class="platform-name">CapCut</div>
+        <div class="platform-desc">Free, extremely powerful, designed for exactly this type of reel. Split screen is a built-in feature. Available on desktop and mobile.</div>
+        <div class="platform-rec rec-good">Great Option</div>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">🤖</div>
+        <div class="platform-name">HeyGen</div>
+        <div class="platform-desc">AI avatar option if Megan or Luz prefer not to record themselves. Can use their likeness for a polished professional result.</div>
+        <div class="platform-rec rec-alt">Alternative</div>
+      </div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Megan records her segments in Jacksonville</div>
+          <div class="step-body"><strong>Equipment needed:</strong> Phone or laptop camera, ring light ($20-30 on Amazon), clean neutral background (wall or bookshelf). <strong>Recording tips:</strong> Eye level camera, good natural light or ring light, quiet room, speak slowly and warmly. Record each segment twice. Keep takes under 30 seconds each. <strong>Files:</strong> Save as MP4 and send to Luz or your editor via Google Drive.</div>
+        </div>
+        <div class="step-badge badge-midmonth">Mid-Month</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Luz records her segments in Mexico</div>
+          <div class="step-body">Same setup as Megan. <strong>Important:</strong> Luz should record in a well-lit, clean, professional-looking space. She should introduce herself in English first, then optionally say her bilingual tagline in Spanish: <em>"Hablo inglés y español — lo que sea más fácil para usted."</em> Warm smile, natural energy. Send files to same Google Drive folder.</div>
+        </div>
+        <div class="step-badge badge-midmonth">Mid-Month</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Edit split screen video in Canva</div>
+          <div class="step-body"><strong>Step by step in Canva:</strong><br>
+          1. Open Canva → Create Design → Video (16:9 landscape)<br>
+          2. Upload both video files<br>
+          3. Use the <strong>Split Screen</strong> layout template under Elements → Frames<br>
+          4. Add Verandah teal (#008C82) header bar with logo<br>
+          5. Add name lower-thirds: "Megan Fairchild — Director of Maintenance & Client Experience" and "Luz Reyes — Client Experience Specialist · Se Habla Español"<br>
+          6. Add gold (#D4AF50) accent lines<br>
+          7. Add subtle background music at 10% volume (Canva has free library)<br>
+          8. Export as MP4 at highest quality</div>
+        </div>
+        <div class="step-badge badge-midmonth">Mid-Month</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Deploy video to owners via email</div>
+          <div class="step-body"><strong>Do NOT attach the video file</strong> — email clients block large video files. Instead: Upload the video to YouTube as Unlisted, OR upload to Loom (free), OR upload to Canva's share link. Embed a thumbnail image in the email with a play button overlay that links to the video. Subject: <em>"Meet Your Verandah Client Experience Team — A Message from Megan & Luz"</em>. Send from clientexperience@verandahproperties.com.</div>
+        </div>
+        <div class="step-badge badge-midmonth">Mid-Month</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Send Pamela's portfolio announcement email simultaneously</div>
+          <div class="step-body">The day the video goes out, Pamela's personal portfolio announcement email also goes out — introducing the team structure, teasing upcoming owner tools, and including the survey link for any owners who haven't yet responded. Subject: <em>"A Personal Note from Pamela — Something Exciting is Here"</em></div>
+        </div>
+        <div class="step-badge badge-midmonth">Mid-Month</div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title-wrap">
+        <div class="section-eyebrow">Ongoing Protocol</div>
+        <div class="section-title">Owner Visit <em>Request Policy</em></div>
+      </div>
+    </div>
+
+    <div class="info-box important">
+      <div class="info-box-label">⚠️ Critical — Effective Immediately</div>
+      Any owner visit or meeting request must be communicated to Pamela within 24 hours of receipt. No exceptions. This is a leadership visibility requirement — not optional.
+    </div>
+
+    <div class="policy-grid">
+      <div class="policy-card occupied">
+        <div class="policy-card-label">🏠 Occupied Property</div>
+        <div class="policy-card-time">3 Weeks</div>
+        <div class="policy-card-desc">Minimum lead time required to coordinate with the tenant, provide proper Florida statutory notice of entry, confirm property condition, and schedule with Megan. Never promise less than this timeline to an owner.</div>
+      </div>
+      <div class="policy-card vacant">
+        <div class="policy-card-label">🔑 Vacant Property</div>
+        <div class="policy-card-time">1 Week</div>
+        <div class="policy-card-desc">Minimum lead time required to confirm property readiness, coordinate access, and schedule with Megan. For properties mid-turn, additional time may be needed. Confirm condition before committing.</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Luz response script when an owner requests a visit</div>
+          <div class="step-body"><em>"Thank you so much for reaching out — we would love the opportunity to connect with you in person. To make sure we coordinate everything properly and honor your tenant's rights under Florida law, we ask for [3 weeks / 1 week] of lead time. I will connect with Megan right away to find a time that works. Please let me know your preferred dates and I will have options for you shortly."</em><br><br>Then: Immediately notify Pamela AND Megan by email with subject line: <strong>"⚑ OWNER VISIT REQUEST — [Property Address] — [Owner Name]"</strong></div>
+        </div>
+        <div class="step-badge badge-ongoing">Ongoing</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">All owner meetings coordinated by Megan — location options</div>
+          <div class="step-body">Megan personally coordinates and attends all owner in-person meetings. Three location options in order of preference:<br><br>
+          1. <strong>Lake Nona Office</strong> — 6900 Tavistock Lakes Blvd Suite 457, Orlando FL 32827<br>
+          2. <strong>Baldwin Park Office</strong> — 4767 New Broad Street, Orlando FL 32814<br>
+          3. <strong>At the Property</strong> — only when property is vacant or tenant has been properly noticed</div>
+        </div>
+        <div class="step-badge badge-ongoing">Ongoing</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title-wrap">
+        <div class="section-eyebrow">Escalation Chain</div>
+        <div class="section-title">Who Handles <em>What</em></div>
+      </div>
+    </div>
+
+    <div class="escalation-chain">
+      <div class="escalation-node primary">
+        <div class="escalation-name">Luz Reyes</div>
+        <div class="escalation-role">Client Experience Specialist</div>
+        <div class="escalation-trigger">First point of contact for ALL owner communications</div>
+      </div>
+      <div class="escalation-arrow">→</div>
+      <div class="escalation-node secondary">
+        <div class="escalation-name">Megan Fairchild</div>
+        <div class="escalation-role">Director of Maintenance & Client Experience</div>
+        <div class="escalation-trigger">Complex issues · Visit requests · Unhappy owners · Major decisions</div>
+      </div>
+      <div class="escalation-arrow">→</div>
+      <div class="escalation-node tertiary">
+        <div class="escalation-name">Pamela Syvertson</div>
+        <div class="escalation-role">Owner & Broker</div>
+        <div class="escalation-trigger">High-risk owners · Legal matters · Terminations · Strategic decisions</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Luz handles daily — response time standard: same business day</div>
+          <div class="step-body">General inquiries · Maintenance status updates · Payment questions · Lease information · Scheduling · Survey follow-up calls · Owner check-ins · General communication</div>
+        </div>
+        <div class="step-badge badge-ongoing">Luz</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Megan handles — response time standard: within 24 hours</div>
+          <div class="step-body">Owner visit coordination · Maintenance disputes · Major repair decisions · Unhappy owner calls flagged by Luz · Insurance questions · Lease terminations · Vendor conflicts · Any situation Luz is unsure how to handle</div>
+        </div>
+        <div class="step-badge badge-ongoing">Megan</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Pamela notified immediately for</div>
+          <div class="step-body">Any owner visit request · Any owner expressing intention to leave · Any owner scoring 1-2 on the satisfaction survey · Any legal threat or complaint · Any situation involving former team members or competitor activity · Any owner who has not responded to the survey after 7 days</div>
+        </div>
+        <div class="step-badge badge-ongoing">Pamela</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title-wrap">
+        <div class="section-eyebrow">Ongoing Relationship Touchpoints</div>
+        <div class="section-title">Proactive <em>Owner Care</em> Calendar</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Weekly — Luz proactive outreach to any owner with open items</div>
+          <div class="step-body">Every Friday, Luz reviews all open owner items in AppFolio and sends a brief update to any owner with an active maintenance issue, pending lease, or recent question — even if there is no new news. A simple <em>"Just checking in — everything is on track"</em> prevents anxiety and builds trust.</div>
+        </div>
+        <div class="step-badge badge-ongoing">Weekly</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Quarterly — Video property walkthrough delivered to every owner</div>
+          <div class="step-body">Tied to the existing inspection cycle. Inspector records a 3-5 minute narrated walkthrough video at each inspection. Delivered to the owner by Luz with a brief note. This eliminates the need for most owners to ever request an in-person visit — they can see their property from anywhere in the world.</div>
+        </div>
+        <div class="step-badge badge-ongoing">Quarterly</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Monthly — Owner market update email from Pamela or Megan</div>
+          <div class="step-body">A brief market update — Lake Nona rental trends, vacancy rates, any relevant legislative changes — sent from Pamela or Megan personally. Positions Verandah as the informed advisor and keeps Pamela's name consistently in owner inboxes without requiring a personal call.</div>
+        </div>
+        <div class="step-badge badge-ongoing">Monthly</div>
+      </div>
+
+      <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-checkbox"><span class="step-checkbox-check">✓</span></div>
+        <div class="step-content">
+          <div class="step-title">Annually — Owner State of Investment Report</div>
+          <div class="step-body">A branded personalized annual report for each owner showing: rent collected, maintenance completed, inspection results, market context, tenant payment history, and forward outlook. Delivered digitally by Luz with a personal cover note. This is the single most powerful retention tool — it makes Verandah feel indispensable at renewal time.</div>
+        </div>
+        <div class="step-badge badge-ongoing">Annually</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-brand">Verandah Properties LLC — Internal Protocol</div>
+  <div class="footer-note">Confidential · For team use only<br>Owner & Broker: Pamela Syvertson · (407) 855-0331</div>
+</div>
+
+<script>
+function toggleStep(card) {
+  card.classList.toggle('completed');
+  // Save state to localStorage
+  const steps = document.querySelectorAll('.step-card');
+  const state = Array.from(steps).map(s => s.classList.contains('completed'));
+  localStorage.setItem('verandah-protocol-state', JSON.stringify(state));
+}
+
+// Restore state on load
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('verandah-protocol-state');
+  if (saved) {
+    const state = JSON.parse(saved);
+    const steps = document.querySelectorAll('.step-card');
+    steps.forEach((step, i) => {
+      if (state[i]) step.classList.add('completed');
+    });
+  }
+});
+</script>
+
+</body>
+</html>
